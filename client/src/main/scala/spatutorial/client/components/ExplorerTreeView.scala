@@ -1,12 +1,18 @@
 package spatutorial.client.components
 
+import chandu0101.scalajs.react.components.ReactEventB
 import chandu0101.scalajs.react.components.materialui.{MuiTableHeaderColumn, _}
 import japgolly.scalajs.react.{ReactComponentB, ReactElement}
 import japgolly.scalajs.react.vdom.prefix_<^._
 
+import scala.scalajs.js
 import scalacss.internal.mutable.StyleSheet
 import scalacss.Defaults._
 import scalacss.ScalaCssReact._
+import scalaz.TreeLoc
+import japgolly.scalajs.react.Callback
+
+import japgolly.scalajs.react._
 
 
 /**
@@ -25,8 +31,20 @@ object ExplorerTreeView {
   import scala.scalajs.js.JSConverters._
 
 
+
+
   import scalaz.Tree
 
+
+  sealed trait SoubSystem {
+    def name: String
+  }
+
+  case class Slozka(name : String) extends SoubSystem
+  case class Soubor(name: String) extends SoubSystem
+
+  def slozka(name: String): SoubSystem = Slozka.apply(name)
+  def soubor(name: String): SoubSystem = Soubor.apply(name)
 
   object Style extends StyleSheet.Inline {
 
@@ -43,20 +61,24 @@ object ExplorerTreeView {
     )
 
   }
-  
 
-  def createTree() : Tree[String] = {
+
+  def createTree() : Tree[SoubSystem] = {
     import scalaz.Scalaz._
 
-    val strom: Tree[String] =
-      "folder1".node(
-        "financial report.docx".leaf,
-        "dalsi subfolder".node(
-          "ahoj.txt".leaf,
-          "prdel.doc".leaf
+    val strom: Tree[SoubSystem] =
+      slozka("folder1").node(
+
+        soubor("financial report.docx").leaf,
+
+        slozka("dalsi subfolder").node(
+          soubor("ahoj.txt").leaf,
+          soubor("prdel.doc").leaf
         ),
-        "ahoj2.txt".leaf,
-        "empty node".node()
+
+
+        soubor("ahoj2.txt").leaf,
+        slozka("empty node").node()
 
       )
 
@@ -65,23 +87,61 @@ object ExplorerTreeView {
   }
 
 
-  def createListItem(node: Tree[String]): ReactElement = {
-    val subforest = node.subForest.toList
-    val isNode = node.loc
+  def createListItem(node: Tree[SoubSystem]): ReactElement = {
+    assert(node.rootLabel.isInstanceOf[Slozka], "Root element must be Slozka")
 
-//    node match {
-//      case Tree.Node(root, forest) => ""
-//      case Tree.Leaf(root) => ""
-//    }
+    //val subtree = forest.filter(!_.).map(x => createListItem(x)).toJsArray
+    val subtree = node.subForest.filter(x => x.rootLabel match {
+      case Slozka(_) => true
+      case _ => false
+    }).map(x => createListItem(x)).toJsArray
 
-    if(subforest.isEmpty) {
-      MuiListItem(key = node.rootLabel, primaryText = node.rootLabel, leftIcon = FileAttachment()())()
+    val subitems: js.UndefOr[js.Array[ReactElement]] = if(subtree.isEmpty) {
+       js.undefined
     }else {
-      val subtree = subforest.map(x => createListItem(x)).toSeq.toJsArray
-      val subitems = UndefOr.any2undefOrA(subtree)
-      MuiListItem(key = node.rootLabel, primaryText = node.rootLabel, nestedItems = subitems,
-        leftIcon = FileFolder()(), initiallyOpen = true)()
+      UndefOr.any2undefOrA(subtree)
     }
+
+
+    MuiListItem(key = node.rootLabel.name, primaryText = node.rootLabel.name, nestedItems = subitems,
+        leftIcon = FileFolder()(), initiallyOpen = true, onClick = UndefOr.any2undefOrA(itemCallBack(node.loc)))()
+
+  }
+
+
+  def itemCallBack(itemLoc: TreeLoc[SoubSystem])(reactEvent: ReactEvent) = Callback {
+    println("on lcick on element")
+    println("target : " + itemLoc.tree.rootLabel)
+  }
+
+
+
+  def createTable(treeLoc: TreeLoc[SoubSystem]): ReactElement = {
+    val files = treeLoc.tree.subForest.filter(x => x.rootLabel match {
+      case Soubor(f) => true
+      case _ => false
+    }).map(x => x.rootLabel.name)
+
+
+    MuiTable(key="tabulka")(
+      MuiTableHeader(key="header")(
+        MuiTableRow(key="row1")(
+          MuiTableHeaderColumn(key="header1")("file neme"),
+          MuiTableHeaderColumn(key="header2")("puid"),
+          MuiTableHeaderColumn(key="header3")("closure")
+        )
+      ),
+      MuiTableBody(key="table body")(
+        files.map { file =>
+          MuiTableRow(key=file)(
+            MuiTableRowColumn(key="column1")(file),
+            MuiTableRowColumn(key="column2")("fmt/100"),
+            MuiTableRowColumn(key="column3")("open on transfer")
+          )
+        }
+      )
+    )
+
   }
 
 
@@ -98,22 +158,7 @@ object ExplorerTreeView {
 
       ),//div pro menu end
         <.div(Style.fileTable, ^.id:= "dabulkaDiv")(
-            MuiTable(key="tabulka")(
-            MuiTableHeader(key="header")(
-              MuiTableRow(key="row1")(
-                MuiTableHeaderColumn(key="header1")("file neme"),
-                MuiTableHeaderColumn(key="header2")("puid"),
-                MuiTableHeaderColumn(key="header3")("closure")
-              )
-            ),
-            MuiTableBody(key="table body")(
-              MuiTableRow(key="row1")(
-                MuiTableRowColumn(key="column1")("file.txt"),
-                MuiTableRowColumn(key="column2")("fmt/100"),
-                MuiTableRowColumn(key="column3")("open on transfer")
-              )
-            )
-          )
+            createTable(createTree().loc)
         )
 
 
