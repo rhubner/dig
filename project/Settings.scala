@@ -45,6 +45,7 @@ object Settings {
    * the special %%% function selects the correct version for each project
    */
   val sharedDependencies = Def.setting(Seq(
+    "org.scalaz" %%% "scalaz-core" % "7.2.8",
     "com.lihaoyi" %%% "autowire" % versions.autowire,
     "me.chrons" %%% "boopickle" % versions.booPickle
   ))
@@ -54,7 +55,8 @@ object Settings {
     "com.vmunier" %% "scalajs-scripts" % versions.scalajsScripts,
     "org.webjars" % "font-awesome" % "4.3.0-1" % Provided,
     "org.webjars" % "bootstrap" % versions.bootstrap % Provided,
-    "com.lihaoyi" %% "utest" % versions.uTest % Test
+    "com.lihaoyi" %% "utest" % versions.uTest % Test,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "test"
   ))
 
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
@@ -63,7 +65,6 @@ object Settings {
     "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact,
     "com.github.japgolly.scalacss" %%% "ext-react" % versions.scalaCSS,
     "com.olvind" %%% "scalajs-react-components" % "0.6.0",
-    "org.scalaz" %%% "scalaz-core" % "7.2.8",
     "me.chrons" %%% "diode" % versions.diode,
     "me.chrons" %%% "diode-react" % versions.diode,
     "org.scala-js" %%% "scalajs-dom" % versions.scalaDom,

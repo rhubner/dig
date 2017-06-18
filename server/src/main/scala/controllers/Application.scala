@@ -8,6 +8,8 @@ import play.api.{Configuration, Environment}
 import play.api.mvc._
 import services.ApiService
 import spatutorial.shared.Api
+import spatutorial.shared.MyCustomPickle._
+
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

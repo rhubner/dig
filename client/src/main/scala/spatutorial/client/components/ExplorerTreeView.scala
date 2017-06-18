@@ -11,7 +11,7 @@ import scalacss.Defaults._
 import scalacss.ScalaCssReact._
 import scalaz.TreeLoc
 import japgolly.scalajs.react.Callback
-
+import spatutorial.shared._
 import japgolly.scalajs.react._
 
 
@@ -31,17 +31,8 @@ object ExplorerTreeView {
   import scala.scalajs.js.JSConverters._
 
 
-
-
   import scalaz.Tree
 
-
-  sealed trait SoubSystem {
-    def name: String
-  }
-
-  case class Slozka(name : String) extends SoubSystem
-  case class Soubor(name: String) extends SoubSystem
 
   case class Props(tree: Tree[SoubSystem])
   case class State(treeLoc: TreeLoc[SoubSystem])
@@ -165,6 +156,7 @@ object ExplorerTreeView {
 
 
   def apply() = component(Props(createTree()))
+  def apply(strom: Tree[SoubSystem]) = component(Props(strom))
 
 
 }

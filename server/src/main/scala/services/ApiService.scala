@@ -1,8 +1,10 @@
 package services
 
-import java.util.{UUID, Date}
+import java.util.{Date, UUID}
 
 import spatutorial.shared._
+
+import scalaz.Tree
 
 class ApiService extends Api {
   var todos = Seq(
@@ -47,5 +49,24 @@ class ApiService extends Api {
     Thread.sleep(300)
     todos = todos.filterNot(_.id == itemId)
     todos
+  }
+
+  override def getTree(): Tree[SoubSystem] = {
+
+    def slozka(name: String): SoubSystem = Slozka.apply(name)
+    def soubor(name: String): SoubSystem = Soubor.apply(name)
+
+    import scalaz.Scalaz._
+    val strom: Tree[SoubSystem] =
+      slozka("folder1").node(
+        soubor("financial report.docx").leaf,
+        slozka("dalsi subfolder").node(
+          soubor("ahoj.txt").leaf,
+          soubor("prdel.doc").leaf
+        ),
+        soubor("ahoj2.txt").leaf,
+        slozka("empty node").node()
+      )
+    strom
   }
 }
