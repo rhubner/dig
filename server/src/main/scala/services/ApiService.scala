@@ -56,36 +56,23 @@ class ApiService @Inject() (db: Database) extends Api {
   }
 
   override def getTree(): Tree[SoubSystem] = {
-
-    def slozka(name: String): SoubSystem = Slozka.apply(name)
-    def soubor(name: String): SoubSystem = Soubor.apply(name)
-
-    import scalaz.Scalaz._
-    val strom: Tree[SoubSystem] =
-      slozka("folder1").node(
-        soubor("financial report.docx").leaf,
-        slozka("dalsi subfolder").node(
-          soubor("ahoj.txt").leaf,
-          soubor("prdel.doc").leaf
-        ),
-        soubor("ahoj2.txt").leaf,
-        slozka("empty node").node()
-      )
-    //strom
-
     buildTree(None, "ROOT")
 
   }
 
+
+
   def buildTree(parentId: Option[Long], nodeName: String): Tree[SoubSystem] = {
-    def slozka(name: String): SoubSystem = Slozka.apply(name)
-    def soubor(name: String): SoubSystem = Soubor.apply(name)
     import scalaz.Scalaz._
+
+    def slozka(name: String): SoubSystem = Slozka.apply(name)
+    def soubor(name: String, puid: String): SoubSystem = Soubor.apply(name, puid)
+
 
     val nodes = loadNodes(parentId)
     val dirs = nodes.filter(_.resourceType == 0)
 
-    val files = nodes.filter(_.resourceType != 0).map(x => soubor(x.name).leaf)
+    val files = nodes.filter(_.resourceType != 0).map(x => soubor(x.name, x.puid).leaf)
 
 
     val subforest = dirs.map(x => {

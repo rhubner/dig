@@ -37,10 +37,6 @@ object ExplorerTreeView {
   case class Props(tree: Tree[SoubSystem])
   case class State(treeLoc: TreeLoc[SoubSystem])
 
-
-  def slozka(name: String): SoubSystem = Slozka.apply(name)
-  def soubor(name: String): SoubSystem = Soubor.apply(name)
-
   object Style extends StyleSheet.Inline {
 
     import dsl._
@@ -57,20 +53,7 @@ object ExplorerTreeView {
   }
 
 
-  def createTree() : Tree[SoubSystem] = {
-    import scalaz.Scalaz._
-    val strom: Tree[SoubSystem] =
-      slozka("folder1").node(
-        soubor("financial report.docx").leaf,
-        slozka("dalsi subfolder").node(
-          soubor("ahoj.txt").leaf,
-          soubor("prdel.doc").leaf
-        ),
-        soubor("ahoj2.txt").leaf,
-        slozka("empty node").node()
-      )
-    strom
-  }
+
 
 
   class Backend(t: BackendScope[Props, State]) {
@@ -105,9 +88,9 @@ object ExplorerTreeView {
 
     def createTable(treeLoc: TreeLoc[SoubSystem]): ReactElement = {
       val files = treeLoc.tree.subForest.filter(x => x.rootLabel match {
-        case Soubor(f) => true
+        case Soubor(_, _) => true
         case _ => false
-      }).map(x => x.rootLabel.name)
+      }).map(x => x.rootLabel.asInstanceOf[Soubor])
 
 
       MuiTable(key="tabulka")(
@@ -120,9 +103,9 @@ object ExplorerTreeView {
         ),
         MuiTableBody(key="table body")(
           files.map { file =>
-            MuiTableRow(key=file)(
-              MuiTableRowColumn(key="column1")(file),
-              MuiTableRowColumn(key="column2")("fmt/100"),
+            MuiTableRow(key=file.name)(
+              MuiTableRowColumn(key="column1")(file.name),
+              MuiTableRowColumn(key="column2")(file.puid),
               MuiTableRowColumn(key="column3")("open on transfer")
             )
           }
@@ -154,8 +137,6 @@ object ExplorerTreeView {
     .renderBackend[Backend]
     .build
 
-
-  def apply() = component(Props(createTree()))
   def apply(strom: Tree[SoubSystem]) = component(Props(strom))
 
 
