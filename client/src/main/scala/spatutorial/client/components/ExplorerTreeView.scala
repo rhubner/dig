@@ -88,7 +88,7 @@ object ExplorerTreeView {
 
     def createTable(treeLoc: TreeLoc[SoubSystem]): ReactElement = {
       val files = treeLoc.tree.subForest.filter(x => x.rootLabel match {
-        case Soubor(_, _) => true
+        case s: Soubor => true
         case _ => false
       }).map(x => x.rootLabel.asInstanceOf[Soubor])
 
@@ -98,7 +98,8 @@ object ExplorerTreeView {
           MuiTableRow(key="row1")(
             MuiTableHeaderColumn(key="header1")("file neme"),
             MuiTableHeaderColumn(key="header2")("puid"),
-            MuiTableHeaderColumn(key="header3")("closure")
+            MuiTableHeaderColumn(key="header3")("file size"),
+            MuiTableHeaderColumn(key="header4")("closure")
           )
         ),
         MuiTableBody(key="table body")(
@@ -106,6 +107,7 @@ object ExplorerTreeView {
             MuiTableRow(key=file.name)(
               MuiTableRowColumn(key="column1")(file.name),
               MuiTableRowColumn(key="column2")(file.puid),
+              MuiTableRowColumn(key="column2")(file.fileSize),
               MuiTableRowColumn(key="column3")("open on transfer")
             )
           }

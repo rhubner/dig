@@ -10,7 +10,7 @@ sealed trait SoubSystem {
 }
 
 case class Slozka(name : String) extends SoubSystem
-case class Soubor(name: String, puid: String) extends SoubSystem
+case class Soubor(name: String, puid: String, fileSize: Long) extends SoubSystem
 
 
 case class Wrapper(strom: Tree[Slozka])

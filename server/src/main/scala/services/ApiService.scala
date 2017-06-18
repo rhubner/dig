@@ -66,13 +66,13 @@ class ApiService @Inject() (db: Database) extends Api {
     import scalaz.Scalaz._
 
     def slozka(name: String): SoubSystem = Slozka.apply(name)
-    def soubor(name: String, puid: String): SoubSystem = Soubor.apply(name, puid)
+    def soubor(name: String, puid: String, fileSize: Long): SoubSystem = Soubor.apply(name, puid, fileSize)
 
 
     val nodes = loadNodes(parentId)
     val dirs = nodes.filter(_.resourceType == 0)
 
-    val files = nodes.filter(_.resourceType != 0).map(x => soubor(x.name, x.puid).leaf)
+    val files = nodes.filter(_.resourceType != 0).map(x => soubor(x.name, x.puid, x.fileSize.getOrElse(-1)).leaf)
 
 
     val subforest = dirs.map(x => {
@@ -87,20 +87,20 @@ class ApiService @Inject() (db: Database) extends Api {
 def loadNodes(parentId: Option[Long]): List[ProfileNode] = {
   import anorm.SqlParser.{ str, long, int, get}
 
-  val parser = long("node_id") ~ str("name") ~ int("resource_type") ~ str("PUID") ~ get[Option[Long]]("parent_id") map {
-    case nodeId ~ name ~ resourceType ~ puid ~ parentId => ProfileNode(nodeId, name, resourceType, puid, parentId)
+  val parser = long("node_id") ~ str("name") ~ int("resource_type") ~ str("PUID") ~ get[Option[Long]]("parent_id") ~ get[Option[Long]]("file_size") map {
+    case nodeId ~ name ~ resourceType ~ puid ~ parentId ~ fileSize => ProfileNode(nodeId, name, resourceType, puid, parentId, fileSize)
   }
 
   db.withConnection { implicit c =>
 
     val sql = if(parentId.isDefined) {
-      SQL("""select node.node_id, node.name, node.resource_type, ide.PUID, node.parent_id
+      SQL("""select node.node_id, node.name, node.resource_type, ide.PUID, node.parent_id, node.FILE_SIZE
              from PROFILE_RESOURCE_NODE node join IDENTIFICATION ide on ide.NODE_ID = node.NODE_ID
-             where parent_ID = {parentId}""").on('parentId -> parentId.get)
+             where parent_ID = {parentId} order by name""").on('parentId -> parentId.get)
     }else {
-      SQL("""select node.node_id, node.name, node.resource_type, ide.PUID, node.parent_id
+      SQL("""select node.node_id, node.name, node.resource_type, ide.PUID, node.parent_id, node.FILE_SIZE
              from PROFILE_RESOURCE_NODE node join IDENTIFICATION ide on ide.NODE_ID = node.NODE_ID
-             where parent_ID is null""").on()
+             where parent_ID is null order by name""").on()
     }
 
     val res = sql
@@ -112,7 +112,7 @@ def loadNodes(parentId: Option[Long]): List[ProfileNode] = {
 
 
 
-  case class ProfileNode(id: Long, name: String, resourceType: Int, puid: String, parentId: Option[Long] )
+  case class ProfileNode(id: Long, name: String, resourceType: Int, puid: String, parentId: Option[Long], fileSize: Option[Long] )
 
 
 
