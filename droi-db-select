@@ -1,0 +1,1 @@
+select node.node_id, node.resource_type, node.name, ide.PUID, node.parent_id from PROFILE_RESOURCE_NODE node left join IDENTIFICATION ide on ide.NODE_ID = node.NODE_ID

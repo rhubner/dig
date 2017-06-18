@@ -56,7 +56,11 @@ object Settings {
     "org.webjars" % "font-awesome" % "4.3.0-1" % Provided,
     "org.webjars" % "bootstrap" % versions.bootstrap % Provided,
     "com.lihaoyi" %% "utest" % versions.uTest % Test,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "test"
+    "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "test",
+    "com.typesafe.play" %% "play-jdbc" % "2.5.9",
+    "org.apache.derby" % "derby" % "10.10.2.0",
+    "com.typesafe.play" %% "anorm" % "2.5.1"
+
   ))
 
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
