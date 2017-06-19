@@ -59,7 +59,9 @@ object Settings {
     "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "test",
     "com.typesafe.play" %% "play-jdbc" % "2.5.9",
     "org.apache.derby" % "derby" % "10.10.2.0",
-    "com.typesafe.play" %% "anorm" % "2.5.1"
+    "com.typesafe.play" %% "anorm" % "2.5.1",
+    "org.apache.commons" % "commons-compress" % "1.14",
+    "commons-io" % "commons-io" % "2.5"
 
   ))
 

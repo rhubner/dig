@@ -2,7 +2,7 @@ package spatutorial.client.modules
 
 import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 import spatutorial.shared.{Api, SoubSystem}
-import spatutorial.client.services.AjaxClient
+import spatutorial.client.services.{AjaxClient, UploadAjaxClient}
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import autowire._
@@ -26,6 +26,19 @@ object HlavniStranka {
   class Backend(t: BackendScope[Props, State]) {
 
 
+    def updateFile(e: ReactEventI) = Callback.future{
+      val file = e.target.files(0)
+      val remoteCall = UploadAjaxClient.doUpload(file)
+              .map(x => t.setState(State(Some(x))))
+
+      remoteCall.map(x => {
+        println("volani provedeno")
+        x
+      })
+
+    }
+
+
     def loadItemCallback() = Callback.future {
 
       val remoteCall = AjaxClient[Api].getTree().call()
@@ -41,7 +54,9 @@ object HlavniStranka {
 
     def render(p: Props, s: State) = {
       <.div(
-        <.button(^.onClick --> loadItemCallback)("tlacitko"),
+        //<.button(^.onClick --> loadItemCallback)("tlacitko"),
+        "load droid file : ",
+        <.input.file(^.id := "fileUpload", ^.onChange ==> updateFile),
 
         if(s.tree.isDefined) {
           ExplorerTreeView(s.tree.get)
@@ -50,8 +65,6 @@ object HlavniStranka {
         }
       )
     }
-
-
 
 
   }
